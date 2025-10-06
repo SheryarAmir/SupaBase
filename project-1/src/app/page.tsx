@@ -1,11 +1,26 @@
-import React from "react";
+"use client";
+
+import { supabase } from "@/constant/supabase-client";
+import React, { useEffect, useState } from "react";
+import Dashboard from "@/components/dashboard/page";
+import Adduser from "@/components/adduser/page";
 
 const page = () => {
+  const [Session, setSession] = useState<any>(null);
+
+  const fetchSession = async () => {
+    const currentSession = await supabase.auth.getSession();
+    console.log(currentSession);
+  };
+
+  useEffect(() => {
+    fetchSession();
+  }, []);
+
   return (
     <div>
-      Lorem ipsum dolor sit amet consectetur adipisicing elit. Distinctio vero,
-      obcaecati sit aliquid nisi commodi placeat dicta aperiam autem iusto
-      dolore nulla labore suscipit delectus totam aut asperiores maxime fuga?
+      <Dashboard />
+      <Adduser />
     </div>
   );
 };
