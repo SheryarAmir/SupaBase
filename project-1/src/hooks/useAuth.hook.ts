@@ -2,6 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { signIn, signUp, signOut } from "@/services/auth.services";
 import { useRouter } from "next/navigation";
 import { SignUpCredentials, SignInCredentials } from "@/types/auth";
+
 export const useSignUp = () => {
   const router = useRouter();
 
