@@ -2,39 +2,32 @@
 
 import { supabase } from "@/constant/supabase-client";
 import React, { useEffect, useState } from "react";
-import Dashboard from "@/components/dashboard/page";
-import Adduser from "@/components/adduser/page";
-import { useSignOut } from "@/hooks/useAuth.hook";
+import Dashboard from "@/app/dashboard/page";
+import Adduser from "@/app/adduser/page";
+
 const page = () => {
   const [Session, setSession] = useState<any>(null);
 
-  const { mutate } = useSignOut();
-
   const fetchSession = async () => {
+    // this function is check for the session , if the session  avabile then show the adduser page otherwise show the dashboard page.
     const currentSession = await supabase.auth.getSession();
     console.log(currentSession);
     setSession(currentSession.data.session);
   };
 
   useEffect(() => {
-    fetchSession();
+    fetchSession(); // run the function
   }, []);
-
-  const handlerLogOut = () => {
-    mutate();
-  };
 
   return (
     <div>
-      {" "}
       {Session ? (
         <>
-          <button onClick={handlerLogOut}>logout</button>
-          <Adduser />{" "}
+          <Adduser />
         </>
       ) : (
         <Dashboard />
-      )}{" "}
+      )}
     </div>
   );
 };

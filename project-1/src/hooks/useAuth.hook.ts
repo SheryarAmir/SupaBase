@@ -22,7 +22,7 @@ export const useSignIn = () => {
     mutationKey: ["signin"],
     mutationFn: (credentials: SignInCredentials) => signIn(credentials),
     onSuccess: () => {
-      //   router.push("/");
+      router.push("/");
 
       alert("you are success fully signin");
     },
@@ -36,7 +36,7 @@ export const useSignOut = () => {
     mutationKey: ["signout"],
     mutationFn: signOut,
     onSuccess: () => {
-      router.push("/signin");
+      router.push("/dashboard");
     },
   });
 };
