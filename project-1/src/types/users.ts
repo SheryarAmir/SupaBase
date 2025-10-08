@@ -12,4 +12,5 @@ export interface FormData {
   email: string;
   age: number;
   password: string;
+  image: FileList;
 }

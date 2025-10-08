@@ -13,6 +13,7 @@ export default function UserList() {
   const { mutate } = useSignOut();
 
   const onSubmit = (data: FormData) => {
+    console.log(data);
     addUser(data, {
       onSuccess: () => {
         reset(); // clear form
