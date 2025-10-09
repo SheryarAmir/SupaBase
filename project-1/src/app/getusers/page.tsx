@@ -2,6 +2,7 @@
 
 import { useUsers, useDeleteUser, useUpdateUser } from "@/hooks/useUser.hook";
 import { useState } from "react";
+import Image from "next/image";
 
 export default function UserList() {
   const { data: users, isLoading, error } = useUsers();
@@ -44,15 +45,33 @@ export default function UserList() {
   return (
     <section className="max-w-2xl mx-auto p-4">
       <ul className="space-y-4">
-        {users.map((user: any) => (
+        {users.map((user) => (
           <li
             key={user.id}
             className="flex items-center justify-between p-4 bg-white rounded-lg shadow"
           >
-            <div>
-              <span className="font-medium">{user.name}</span>
-              <span className="text-gray-600 mx-2">({user.email})</span>
-              <span className="text-sm text-gray-500">Age {user.age}</span>
+            <div className="flex items-center space-x-4">
+              <div className="relative w-12 h-12 rounded-full overflow-hidden bg-gray-100">
+                {user.image_url ? (
+                  <Image
+                    src={user.image_url}
+                    alt={`${user.name}'s profile`}
+                    fill
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                    <span className="text-xl text-gray-400">
+                      {user.name?.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <div>
+                <span className="font-medium">{user.name}</span>
+                <span className="text-gray-600 mx-2">({user.email})</span>
+                <span className="text-sm text-gray-500">Age {user.age}</span>
+              </div>
             </div>
             <div className="space-x-2">
               <button

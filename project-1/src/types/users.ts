@@ -4,13 +4,23 @@ export interface User {
   email: string;
   age: number;
   password: string;
-  created_at: string; // default column
-  updated_at: string; // default column
+  image_url?: string;
+  created_at: string;
+  updated_at: string;
 }
+
 export interface FormData {
   name: string;
   email: string;
   age: number;
   password: string;
-  image: FileList;
+  image?: FileList;
+}
+
+export interface UserCreateInput {
+  name: string;
+  email: string;
+  age: number;
+  password: string;
+  image_url?: string;
 }

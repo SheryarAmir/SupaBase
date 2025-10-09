@@ -1,5 +1,5 @@
 import { supabase } from "@/constant/supabase-client";
-import { User, FormData } from "@/types/users";
+import { User, UserCreateInput } from "@/types/users";
 
 export const fetchUsers = async (): Promise<User[]> => {
   const { data, error } = await supabase.from("users").select("*");
@@ -7,7 +7,7 @@ export const fetchUsers = async (): Promise<User[]> => {
   return data || [];
 };
 
-export const addUser = async (newUser: FormData) => {
+export const addUser = async (newUser: UserCreateInput) => {
   const { data, error } = await supabase
     .from("users")
     .insert([newUser])

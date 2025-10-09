@@ -6,7 +6,7 @@ import {
   deleteUser,
   updateUser,
 } from "@/services/users.services";
-import { FormData } from "@/types/users";
+import { UserCreateInput } from "@/types/users";
 
 export const useUsers = () => {
   const { data, isLoading, error } = useQuery({
@@ -23,7 +23,7 @@ export const useAddUser = () => {
 
   return useMutation({
     mutationKey: ["users"],
-    mutationFn: (user: FormData) => addUser(user),
+    mutationFn: (user: UserCreateInput) => addUser(user),
     onSuccess: () => {
       // refresh user list after insert
       queryClient.invalidateQueries({ queryKey: ["users"] });

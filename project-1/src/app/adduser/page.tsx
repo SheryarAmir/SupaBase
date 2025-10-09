@@ -5,6 +5,7 @@ import { useAddUser } from "@/hooks/useUser.hook";
 import { FormData } from "@/types/users";
 import Getusers from "@/app/getusers/page";
 import { useSignOut } from "@/hooks/useAuth.hook";
+import { uploadImage } from "@/services/upload.services";
 
 export default function UserList() {
   const { register, handleSubmit, reset } = useForm<FormData>();
@@ -12,13 +13,31 @@ export default function UserList() {
 
   const { mutate } = useSignOut();
 
-  const onSubmit = (data: FormData) => {
-    console.log(data);
-    addUser(data, {
-      onSuccess: () => {
-        reset(); // clear form
-      },
-    });
+  const onSubmit = async (data: FormData) => {
+    try {
+      let imageUrl = undefined;
+
+      // Handle image upload if a file was selected and get the URL back and use it to store in the database table
+      if (data.image && data.image[0]) {
+        imageUrl = await uploadImage(data.image[0]);
+      }
+
+      // Create user data with image_url
+      const { image, ...userData } = data;
+      addUser(
+        {
+          ...userData,
+          image_url: imageUrl, // Using the correct column name in your table
+        },
+        {
+          onSuccess: () => {
+            reset(); // clear form
+          },
+        }
+      );
+    } catch (error) {
+      console.error("Error in form submission:", error);
+    }
   };
 
   const handlerLogOut = () => {
@@ -28,6 +47,14 @@ export default function UserList() {
   return (
     <section className="space-y-4 p-4 border rounded">
       <form onSubmit={handleSubmit(onSubmit)}>
+        <div>
+          <input
+            type="file"
+            {...register("image", { required: true })}
+            className="border p-1 w-full"
+          />
+        </div>
+
         <div>
           <label>Name</label>
           <input
