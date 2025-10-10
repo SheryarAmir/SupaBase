@@ -108,7 +108,7 @@ export default function SignIn() {
 
           <div className="text-sm text-center">
             <Link
-              href="/signup"
+              href="/signin"
               className="font-medium text-indigo-600 hover:text-indigo-500"
             >
               Don&apos;t have an account? Sign up
