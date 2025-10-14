@@ -9,7 +9,8 @@ const page = () => {
   const [Session, setSession] = useState<any>(null);
 
   const fetchSession = async () => {
-    // this function is check for the session , if the session  avabile then show the adduser page otherwise show the dashboard page.
+    // this function is check for the
+    // session , if the session  avabile then show the adduser page otherwise show the dashboard page.
     const currentSession = await supabase.auth.getSession();
     console.log(currentSession);
     setSession(currentSession.data.session);
