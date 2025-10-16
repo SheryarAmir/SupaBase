@@ -7,10 +7,6 @@ import Link from "next/link";
 import { SignInFormData, signInSchema } from "@/schema/auth.schema";
 import { useParams, useSearchParams } from "next/navigation";
 export default function SignIn() {
-  const searchParams = useSearchParams();
-  const role = searchParams.get("role");
-
-  console.log(`login as ${role}`);
   const {
     register,
     handleSubmit,
@@ -22,6 +18,7 @@ export default function SignIn() {
   const { mutate: signIn, isPending, error: submitError } = useSignIn();
 
   const onSubmit = (data: SignInFormData) => {
+    console.log(data);
     signIn(data);
   };
 
@@ -32,17 +29,6 @@ export default function SignIn() {
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             Sign in to your account
           </h2>
-          {role && (
-            <p className="mt-2 text-center text-sm text-gray-600">
-              Signing in as{" "}
-              <span className="font-medium text-indigo-600">
-                {role
-                  .split("-")
-                  .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-                  .join(" ")}
-              </span>
-            </p>
-          )}
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
           <div className="rounded-md shadow-sm space-y-4">

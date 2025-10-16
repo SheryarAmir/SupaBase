@@ -3,7 +3,7 @@
 import { supabase } from "@/constant/supabase-client";
 import React, { useEffect, useState } from "react";
 import Dashboard from "@/app/dashboard/page";
-import Adduser from "@/app/adduser/page";
+import Adduser from "@/app/addTodos/page";
 
 const page = () => {
   const [Session, setSession] = useState<any>(null);

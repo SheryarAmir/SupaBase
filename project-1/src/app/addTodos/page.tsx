@@ -1,19 +1,19 @@
 "use client";
 
 import { useForm } from "react-hook-form";
-import { useAddUser } from "@/hooks/useUser.hook";
-import { FormData } from "@/types/users";
-import Getusers from "@/app/getusers/page";
+import { useAddTodo } from "@/hooks/usetodo.hook";
+import { TodoData } from "@/types/todos";
+import Getusers from "@/app/getTodos/page";
 import { useSignOut } from "@/hooks/useAuth.hook";
 import { uploadImage } from "@/services/upload.services";
 
 export default function UserList() {
-  const { register, handleSubmit, reset } = useForm<FormData>();
-  const { mutate: addUser, isPending, error } = useAddUser();
+  const { register, handleSubmit, reset } = useForm<TodoData>();
+  const { mutate: addUser, isPending, error } = useAddTodo();
 
   const { mutate } = useSignOut();
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: TodoData) => {
     try {
       let imageUrl = undefined;
 
@@ -56,18 +56,18 @@ export default function UserList() {
         </div>
 
         <div>
-          <label>Name</label>
+          <label>title</label>
           <input
-            {...register("name", { required: true })}
+            {...register("title", { required: true })}
             className="border p-1 w-full"
           />
         </div>
 
         <div>
-          <label>Age</label>
+          <label>description</label>
           <input
-            type="number"
-            {...register("age", { valueAsNumber: true, required: true })}
+            type="text"
+            {...register("description", { required: true })}
             className="border p-1 w-full"
           />
         </div>
@@ -79,16 +79,6 @@ export default function UserList() {
             className="border p-1 w-full"
           />
         </div>
-
-        <div>
-          <label>Password</label>
-          <input
-            type="password"
-            {...register("password", { required: true })}
-            className="border p-1 w-full"
-          />
-        </div>
-
         <button
           type="submit"
           disabled={isPending}

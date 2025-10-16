@@ -1,25 +1,25 @@
 import { supabase } from "@/constant/supabase-client";
-import { User, UserCreateInput } from "@/types/users";
+import { Todo, TodoCreateInput, TodoData } from "@/types/todos";
 
-export const fetchUsers = async (): Promise<User[]> => {
-  const { data, error } = await supabase.from("users").select("*");
+export const fetchTodos = async (): Promise<Todo[]> => {
+  const { data, error } = await supabase.from("todos").select("*");
   if (error) throw error;
   return data || [];
 };
 
-export const addUser = async (newUser: UserCreateInput) => {
+export const addTodo = async (newTodo: TodoCreateInput) => {
   const { data, error } = await supabase
-    .from("users")
-    .insert([newUser])
+    .from("todos")
+    .insert([newTodo])
     .select();
 
   if (error) throw error;
   return data;
 };
 
-export const deleteUser = async (id: string) => {
+export const deleteTodo = async (id: string) => {
   const { data, error } = await supabase
-    .from("users")
+    .from("todos")
     .delete()
     .eq("id", id)
     .select();
@@ -28,9 +28,9 @@ export const deleteUser = async (id: string) => {
   return data;
 };
 
-export const updateUser = async (id: string, updates: Partial<FormData>) => {
+export const updateTodo = async (id: string, updates: Partial<TodoData>) => {
   const { data, error } = await supabase
-    .from("users")
+    .from("todos")
     .update(updates)
     .eq("id", id)
     .select();

@@ -21,10 +21,21 @@ export const useSignIn = () => {
   return useMutation({
     mutationKey: ["signin"],
     mutationFn: (credentials: SignInCredentials) => signIn(credentials),
-    onSuccess: () => {
-      router.push("/");
-
-      alert("you are success fully signin");
+    onSuccess: (data, variables) => {
+      // Navigate based on role
+      switch (variables.role) {
+        case "Super-Admin":
+          router.push("/dashboards/super-admin");
+          break;
+        case "Admin":
+          router.push("/dashboards/admin");
+          break;
+        case "Student":
+          router.push("/dashboards/student");
+          break;
+        default:
+          router.push("/");
+      }
     },
   });
 };
