@@ -1,5 +1,10 @@
-import { useMutation } from "@tanstack/react-query";
-import { signIn, signUp, signOut } from "@/services/auth.services";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  signIn,
+  signUp,
+  signOut,
+  getUserProfile,
+} from "@/services/auth.services";
 import { useRouter } from "next/navigation";
 import { SignUpCredentials, SignInCredentials } from "@/types/auth";
 
@@ -9,7 +14,8 @@ export const useSignUp = () => {
   return useMutation({
     mutationKey: ["signup"],
     mutationFn: (credentials: SignUpCredentials) => signUp(credentials),
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("Signup successful, redirecting to signin", data);
       router.push("/signin");
     },
   });
@@ -17,13 +23,22 @@ export const useSignUp = () => {
 
 export const useSignIn = () => {
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationKey: ["signin"],
     mutationFn: (credentials: SignInCredentials) => signIn(credentials),
-    onSuccess: (data, variables) => {
-      // Navigate based on role
-      switch (variables.role) {
+    onSuccess: async (data) => {
+      console.log("Sign in successful:", data.role);
+
+      // Prefetch the user profile
+      await queryClient.prefetchQuery({
+        queryKey: ["userProfile"],
+        queryFn: getUserProfile,
+      });
+
+      // Navigate based on role from the profile
+      switch (data.role) {
         case "Super-Admin":
           router.push("/dashboards/super-admin");
           break;
@@ -34,8 +49,11 @@ export const useSignIn = () => {
           router.push("/dashboards/student");
           break;
         default:
-          router.push("/");
+          router.push("/main");
       }
+    },
+    onError: (error: Error) => {
+      console.error("Sign in error:", error);
     },
   });
 };

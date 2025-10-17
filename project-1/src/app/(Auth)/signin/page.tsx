@@ -5,7 +5,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useSignIn } from "@/hooks/useAuth.hook";
 import Link from "next/link";
 import { SignInFormData, signInSchema } from "@/schema/auth.schema";
-import { useParams, useSearchParams } from "next/navigation";
 export default function SignIn() {
   const {
     register,
@@ -17,9 +16,12 @@ export default function SignIn() {
 
   const { mutate: signIn, isPending, error: submitError } = useSignIn();
 
-  const onSubmit = (data: SignInFormData) => {
-    console.log(data);
-    signIn(data);
+  const onSubmit = async (data: SignInFormData) => {
+    try {
+      await signIn(data);
+    } catch (error) {
+      console.error("Sign in error:", error);
+    }
   };
 
   return (
@@ -94,7 +96,7 @@ export default function SignIn() {
 
           <div className="text-sm text-center">
             <Link
-              href="/signin"
+              href="/signup"
               className="font-medium text-indigo-600 hover:text-indigo-500"
             >
               Don&apos;t have an account? Sign up

@@ -1,62 +1,104 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { getUserProfile } from "@/services/auth.services";
+import { useForm } from "react-hook-form";
+import { useAddTodo } from "@/hooks/usetodo.hook";
+import { TodoData } from "@/types/todos";
+import Getusers from "@/app/getTodos/page";
+import { useSignOut } from "@/hooks/useAuth.hook";
+import { uploadImage } from "@/services/upload.services";
 
-export default function SuperAdminDashboard() {
-  const router = useRouter();
-  const [loading, setLoading] = useState(true);
+export default function UserList() {
+  const { register, handleSubmit, reset } = useForm<TodoData>();
+  const { mutate: addUser, isPending, error } = useAddTodo();
 
-  useEffect(() => {
-    const checkAccess = async () => {
-      try {
-        const profile = await getUserProfile();
-        if (profile.role !== "Super-Admin") {
-          router.push("/");
-        }
-        setLoading(false);
-      } catch (error) {
-        router.push("/signin");
+  const { mutate } = useSignOut();
+
+  const onSubmit = async (data: TodoData) => {
+    try {
+      let imageUrl = undefined;
+
+      // Handle image upload if a file was selected and get the URL back and use it to store in the database table
+      if (data.image && data.image[0]) {
+        imageUrl = await uploadImage(data.image[0]);
       }
-    };
 
-    checkAccess();
-  }, [router]);
+      // Create user data with image_url
+      const { image, ...userData } = data;
+      addUser(
+        {
+          ...userData,
+          image_url: imageUrl, // Using the correct column name in your table
+        },
+        {
+          onSuccess: () => {
+            reset(); // clear form
+          },
+        }
+      );
+    } catch (error) {
+      console.error("Error in form submission:", error);
+    }
+  };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        Loading...
-      </div>
-    );
-  }
+  const handlerLogOut = () => {
+    mutate();
+  };
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-gray-900">
-              Super Admin Dashboard
-            </h1>
-            <button
-              onClick={() => router.push("/signout")}
-              className="px-4 py-2 bg-red-600 text-white rounded-md"
-            >
-              Sign Out
-            </button>
-          </div>
+    <section className="space-y-4 p-4 border rounded">
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <div>
+          <input
+            type="file"
+            {...register("image", { required: true })}
+            className="border p-1 w-full"
+          />
         </div>
-      </nav>
 
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        {/* Add your super admin specific content here */}
-        <div className="bg-white shadow rounded-lg p-6">
-          <h2 className="text-xl font-semibold mb-4">Super Admin Controls</h2>
-          {/* Add your admin controls here */}
+        <div>
+          <label>title</label>
+          <input
+            {...register("title", { required: true })}
+            className="border p-1 w-full"
+          />
         </div>
-      </main>
-    </div>
+
+        <div>
+          <label>description</label>
+          <input
+            type="text"
+            {...register("description", { required: true })}
+            className="border p-1 w-full"
+          />
+        </div>
+        <div>
+          <label>Email</label>
+          <input
+            type="email"
+            {...register("email", { required: true })}
+            className="border p-1 w-full"
+          />
+        </div>
+        <button
+          type="submit"
+          disabled={isPending}
+          className="bg-blue-500 text-white px-4 py-2 mt-6 rounded"
+        >
+          {isPending ? "Adding..." : "Add User"}
+        </button>
+
+        {error && (
+          <p className="text-red-500">Error: {(error as Error).message}</p>
+        )}
+      </form>
+
+      <button
+        className="bg-orange-500 text-white px-4 py-2  rounded"
+        onClick={handlerLogOut}
+      >
+        logout
+      </button>
+      <Getusers />
+    </section>
   );
 }

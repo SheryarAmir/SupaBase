@@ -2,8 +2,7 @@
 
 import { supabase } from "@/constant/supabase-client";
 import React, { useEffect, useState } from "react";
-import Dashboard from "@/app/dashboard/page";
-import Adduser from "@/app/addTodos/page";
+import Main from "@/app/main/page";
 
 const page = () => {
   const [Session, setSession] = useState<any>(null);
@@ -24,10 +23,10 @@ const page = () => {
     <div>
       {Session ? (
         <>
-          <Adduser />
+          <p>welcome </p>
         </>
       ) : (
-        <Dashboard />
+        <Main />
       )}
     </div>
   );

@@ -10,7 +10,6 @@ export const signUpSchema = z.object({
 export const signInSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(1, "Password is required"),
-  role: z.enum(["Super-Admin", "Admin", "Student"]),
 });
 
 export type SignUpFormData = z.infer<typeof signUpSchema>;

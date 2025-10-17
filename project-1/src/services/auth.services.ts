@@ -1,5 +1,6 @@
 import { supabase } from "@/constant/supabase-client";
 import { SignUpCredentials, SignInCredentials } from "@/types/auth";
+import { UserProfile } from "@/types/profile";
 
 export const signUp = async ({
   email,
@@ -37,7 +38,7 @@ export const signUp = async ({
   return data;
 };
 
-export const signIn = async ({ email, password, role }: SignInCredentials) => {
+export const signIn = async ({ email, password }: SignInCredentials) => {
   // First sign in the user
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
@@ -46,7 +47,7 @@ export const signIn = async ({ email, password, role }: SignInCredentials) => {
 
   if (error) throw error;
 
-  // Verify the user's role
+  // Get the user's role from profiles
   if (data.user) {
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
@@ -56,19 +57,28 @@ export const signIn = async ({ email, password, role }: SignInCredentials) => {
 
     if (profileError) throw profileError;
 
-    // Check if the role matches
-    if (profile?.role !== role) {
-      throw new Error("Access denied. Invalid role for this account.");
-    }
+    return {
+      user: data.user,
+      role: profile.role,
+    };
   }
 
-  return data;
+  throw new Error("Failed to get user profile");
 };
 
-export const getUserProfile = async () => {
+export const signOut = async () => {
+  const { error } = await supabase.auth.signOut();
+  if (error) throw error;
+};
+
+// Get the user profile information hook is in the useUserRole hook
+
+export const getUserProfile = async (): Promise<UserProfile> => {
   const {
     data: { user },
+    error: userError,
   } = await supabase.auth.getUser();
+  if (userError) throw userError;
   if (!user) throw new Error("Not authenticated");
 
   const { data, error } = await supabase
@@ -78,10 +88,5 @@ export const getUserProfile = async () => {
     .single();
 
   if (error) throw error;
-  return data;
-};
-
-export const signOut = async () => {
-  const { error } = await supabase.auth.signOut();
-  if (error) throw error;
+  return data as UserProfile;
 };

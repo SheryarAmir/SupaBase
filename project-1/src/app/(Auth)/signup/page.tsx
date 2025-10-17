@@ -18,6 +18,7 @@ export default function SignUp() {
   const { mutate: signUp, isPending, error: submitError } = useSignUp();
 
   const onSubmit = (data: SignUpFormData) => {
+    console.log("signup data", data);
     signUp(data);
   };
 

@@ -8,5 +8,4 @@ export interface SignUpCredentials {
 export interface SignInCredentials {
   email: string;
   password: string;
-  role: "Super-Admin" | "Admin" | "Student";
 }
