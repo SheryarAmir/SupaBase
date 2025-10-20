@@ -23,7 +23,7 @@ const page = () => {
     <div>
       {Session ? (
         <>
-          <p>welcome </p>
+          <Main />
         </>
       ) : (
         <Main />
