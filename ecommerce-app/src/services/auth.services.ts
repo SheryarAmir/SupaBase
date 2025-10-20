@@ -8,8 +8,27 @@ export const signInWithGoogle = async () => {
     provider: "google",
     options: {
       redirectTo: `${window.location.origin}/auth/callback`,
+      queryParams: {
+        // Pass access_type to ensure we get a refresh token
+        access_type: "offline",
+        // Request user's email and profile info
+        prompt: "consent",
+        scope: "email profile",
+      },
     },
   });
+
+  if (error) throw error;
+  return data;
+};
+
+// Get user profile with role
+export const getUserProfile = async (userId: string) => {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", userId)
+    .single();
 
   if (error) throw error;
   return data;
