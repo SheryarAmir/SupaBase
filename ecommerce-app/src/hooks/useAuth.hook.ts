@@ -4,6 +4,7 @@ import {
   signUp,
   signOut,
   signInWithGoogle,
+  getUserProfile,
 } from "@/services/auth.services";
 import { useRouter } from "next/navigation";
 import { SignUpCredentials, SignInCredentials } from "@/types/auth";
@@ -49,28 +50,24 @@ export const useSignIn = () => {
     mutationFn: (credentials: SignInCredentials) => signIn(credentials),
     onSuccess: async (data) => {
       console.log("Sign in successful:", data.role);
-      router.push("/");
 
-      // // Prefetch the user profile
-      // await queryClient.prefetchQuery({
-      //   queryKey: ["userProfile"],
-      //   queryFn: getUserProfile,
-      // });
+      // Prefetch the user profile
+      await queryClient.prefetchQuery({
+        queryKey: ["userProfile"],
+        queryFn: getUserProfile,
+      });
 
-      // // Navigate based on role from the profile
-      // switch (data.role) {
-      //   case "Super-Admin":
-      //     router.push("/dashboards/super-admin");
-      //     break;
-      //   case "Admin":
-      //     router.push("/dashboards/admin");
-      //     break;
-      //   case "Student":
-      //     router.push("/dashboards/student");
-      //     break;
-      //   default:
-      //     router.push("/main");
-      // }
+      // Navigate based on role from the profile
+      switch (data.role) {
+        case "seller":
+          router.push("/dashboards/seller");
+          break;
+        case "buyer":
+          router.push("/dashboards/buyer");
+          break;
+        default:
+          router.push("/main");
+      }
     },
     onError: (error: Error) => {
       console.error("Sign in error:", error);

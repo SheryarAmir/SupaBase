@@ -9,26 +9,12 @@ export const signInWithGoogle = async () => {
     options: {
       redirectTo: `${window.location.origin}/auth/callback`,
       queryParams: {
-        // Pass access_type to ensure we get a refresh token
         access_type: "offline",
-        // Request user's email and profile info
         prompt: "consent",
         scope: "email profile",
       },
     },
   });
-
-  if (error) throw error;
-  return data;
-};
-
-// Get user profile with role
-export const getUserProfile = async (userId: string) => {
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", userId)
-    .single();
 
   if (error) throw error;
   return data;
@@ -101,6 +87,7 @@ export const signIn = async ({ email, password }: SignInCredentials) => {
   throw new Error("Failed to get user profile");
 };
 
+// Sign out the user
 export const signOut = async () => {
   const { error } = await supabase.auth.signOut();
   if (error) throw error;
@@ -108,20 +95,20 @@ export const signOut = async () => {
 
 // Get the user profile information hook is in the useUserRole hook
 
-// export const getUserProfile = async (): Promise<UserProfile> => {
-//   const {
-//     data: { user },
-//     error: userError,
-//   } = await supabase.auth.getUser();
-//   if (userError) throw userError;
-//   if (!user) throw new Error("Not authenticated");
+export const getUserProfile = async (): Promise<UserProfile> => {
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+  if (userError) throw userError;
+  if (!user) throw new Error("Not authenticated");
 
-//   const { data, error } = await supabase
-//     .from("profiles")
-//     .select("*")
-//     .eq("id", user.id)
-//     .single();
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .single();
 
-//   if (error) throw error;
-//   return data as UserProfile;
-// };
+  if (error) throw error;
+  return data as UserProfile;
+};
