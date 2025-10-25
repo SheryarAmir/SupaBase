@@ -21,6 +21,8 @@ export const uploadImage = async (file: File): Promise<string> => {
         upsert: false,
       });
 
+      
+
     if (uploadError) {
       throw new Error(`Upload failed: ${uploadError.message}`);
     }
