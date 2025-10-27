@@ -6,6 +6,7 @@ import {
   useDeleteProduct,
   useUpdateTodo,
 } from "@/hooks/useSeller.hook";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -18,6 +19,8 @@ export default function ProductsPage() {
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [newTitle, setNewTitle] = useState("");
+
+  console.log("data come from supabase", products);
 
   if (isLoading)
     return (
@@ -40,6 +43,7 @@ export default function ProductsPage() {
 
   const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this product?")) {
+      console.log("Delete id", id);
       await deleteProduct.mutateAsync(id);
     }
   };
@@ -61,7 +65,7 @@ export default function ProductsPage() {
         <Card key={product.id} className="p-4 shadow-sm">
           <CardHeader className="flex justify-between items-center">
             <CardTitle className="text-lg">
-              {editingId === product.id ? (
+              {editingId === product.user_id ? (
                 <Input
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
@@ -75,7 +79,7 @@ export default function ProductsPage() {
               {editingId === product.id ? (
                 <Button
                   size="sm"
-                  onClick={() => handleUpdate(product.id)}
+                  onClick={() => handleUpdate(product.user_id)}
                   disabled={updateProduct.isPending}
                 >
                   Save
@@ -85,8 +89,8 @@ export default function ProductsPage() {
                   variant="outline"
                   size="sm"
                   onClick={() => {
-                    setEditingId(product.id);
-                    setNewTitle(product.title);
+                    setEditingId(product.user_id);
+                    setNewTitle(product.user_id);
                   }}
                 >
                   <Edit className="w-4 h-4 mr-1" /> Edit
@@ -95,7 +99,7 @@ export default function ProductsPage() {
               <Button
                 variant="destructive"
                 size="sm"
-                onClick={() => handleDelete(product.id)}
+                onClick={() => handleDelete(product.user_id)}
                 disabled={deleteProduct.isPending}
               >
                 <Trash2 className="w-4 h-4 mr-1" /> Delete
@@ -104,6 +108,12 @@ export default function ProductsPage() {
           </CardHeader>
 
           <CardContent className="text-sm text-gray-600">
+            <Image
+              src={product.image_url}
+              alt="product image"
+              width={50}
+              height={50}
+            ></Image>
             <p>Category: {product.category}</p>
             <p>Price: ${product.price}</p>
             <p>Stock: {product.stock}</p>

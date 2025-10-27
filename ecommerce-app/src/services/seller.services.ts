@@ -7,15 +7,7 @@ export const fetchAllProducts = async (): Promise<IncommingProductData[]> => {
   return data || [];
 };
 
-export const addProduct = async ({
-  title,
-  description,
-  email,
-  category,
-  price,
-  stock,
-  image_url,
-}: CreateProductPayload) => {
+export const addProduct = async (Newproduct: CreateProductPayload) => {
   //  Get current logged-in user
   const {
     data: { user },
@@ -26,21 +18,16 @@ export const addProduct = async ({
   if (userError) throw userError;
   if (!user) throw new Error("User not authenticated");
 
-  //  Insert product with user.id as foreign key
+  // ✅ Add the user ID to the product payload
+  const productWithUser = {
+    ...Newproduct,
+    user_id: user.id, // or seller_id / profile_id based on your FK
+  };
+
+  //  Insert product with foreign key attached
   const { data, error } = await supabase
     .from("sellerproduct")
-    .insert([
-      {
-        profile_id: user.id, // now defined properly
-        title,
-        description,
-        email,
-        category,
-        price,
-        stock,
-        image_url,
-      },
-    ])
+    .insert([productWithUser])
     .select();
 
   if (error) throw error;
@@ -49,16 +36,29 @@ export const addProduct = async ({
 };
 
 export const deleteProduct = async (id: string) => {
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError) throw userError;
+  if (!user) throw new Error("User not authenticated");
+
   const { data, error } = await supabase
     .from("sellerproduct")
     .delete()
     .eq("id", id)
+    .eq("user_id", user.id)
     .select();
 
   if (error) throw error;
+
+  if (!data || data.length === 0) {
+    throw new Error("Product not found or unauthorized");
+  }
+
   return data;
 };
-
 export const updateProduct = async (
   id: string,
   updates: Partial<IncommingProductData>

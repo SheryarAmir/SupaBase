@@ -11,7 +11,6 @@ export interface IncommingProductData {
 
 export interface Product {
   id: string;
-  seller_id: string;
   title: string;
   description: string;
   email: string;
