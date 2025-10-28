@@ -64,42 +64,11 @@ export default function ProductsPage() {
       {products.map((product: any) => (
         <Card key={product.id} className="p-4 shadow-sm">
           <CardHeader className="flex justify-between items-center">
-            <CardTitle className="text-lg">
-              {editingId === product.user_id ? (
-                <Input
-                  value={newTitle}
-                  onChange={(e) => setNewTitle(e.target.value)}
-                  placeholder="New title"
-                />
-              ) : (
-                product.title
-              )}
-            </CardTitle>
             <div className="flex gap-2">
-              {editingId === product.id ? (
-                <Button
-                  size="sm"
-                  onClick={() => handleUpdate(product.user_id)}
-                  disabled={updateProduct.isPending}
-                >
-                  Save
-                </Button>
-              ) : (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setEditingId(product.user_id);
-                    setNewTitle(product.user_id);
-                  }}
-                >
-                  <Edit className="w-4 h-4 mr-1" /> Edit
-                </Button>
-              )}
               <Button
                 variant="destructive"
                 size="sm"
-                onClick={() => handleDelete(product.user_id)}
+                onClick={() => handleDelete(product.id)}
                 disabled={deleteProduct.isPending}
               >
                 <Trash2 className="w-4 h-4 mr-1" /> Delete

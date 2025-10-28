@@ -48,7 +48,6 @@ export const deleteProduct = async (id: string) => {
     .from("sellerproduct")
     .delete()
     .eq("id", id)
-    .eq("user_id", user.id)
     .select();
 
   if (error) throw error;
