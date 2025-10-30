@@ -3,11 +3,11 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useAddProduct } from "@/hooks/useSeller.hook";
-import { useSignOut } from "@/hooks/useAuth.hook";
+import { useAddProduct } from "@/hooks/sellerhooks/useSeller.hook";
+import { useSignOut } from "@/hooks/Authhooks/useAuth.hook";
 import { uploadImage } from "@/services/upload.services";
 import { Button } from "@/components/ui/button";
-import Productlist from "@/pages/seller/productlist";
+
 import {
   Form,
   FormControl,
@@ -40,7 +40,7 @@ import {
   ProductFormValues,
 } from "@/schema/sellerProduct.schema";
 
-export default function ProductForm() {
+export default function AddProduct() {
   const [preview, setPreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
 

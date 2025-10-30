@@ -2,7 +2,7 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useSignIn, useGoogleSignIn } from "@/hooks/useAuth.hook";
+import { useSignIn, useGoogleSignIn } from "@/hooks/Authhooks/useAuth.hook";
 import Link from "next/link";
 import { SignInFormData, signInSchema } from "@/schema/auth.schema";
 
@@ -11,7 +11,7 @@ export default function SignIn() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<SignInFormData>({ 
+  } = useForm<SignInFormData>({
     resolver: zodResolver(signInSchema),
   });
 

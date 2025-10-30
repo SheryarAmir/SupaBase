@@ -2,7 +2,7 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useSignUp } from "@/hooks/useAuth.hook";
+import { useSignUp } from "@/hooks/Authhooks/useAuth.hook";
 import Link from "next/link";
 import { SignUpFormData, signUpSchema } from "@/schema/auth.schema";
 
