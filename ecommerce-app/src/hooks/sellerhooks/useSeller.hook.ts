@@ -8,6 +8,8 @@ import {
 } from "@/services/seller.services";
 import { CreateProductPayload, IncommingProductData } from "@/types/product";
 
+// sheryar amir
+
 export const useGetAllProducts = () => {
   const { data, isLoading, error } = useQuery({
     queryKey: ["product"],
