@@ -18,7 +18,7 @@ export const useSignUp = () => {
     mutationFn: (credentials: SignUpCredentials) => signUp(credentials),
     onSuccess: (data) => {
       console.log("Signup successful, redirecting to signin", data);
-      router.push("/signin");
+      router.push("/setup-profile");
     },
   });
 };
