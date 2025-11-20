@@ -1,3 +1,4 @@
+"use client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   signIn,
@@ -8,8 +9,9 @@ import {
 } from "@/services/auth.services";
 import { useRouter } from "next/navigation";
 import { SignUpCredentials, SignInCredentials } from "@/types/auth";
+import { useSignupStore } from "@/store/signupStore";
 
-// Hook for user sign-up
+// Hook for user sign-up with complete profile data
 export const useSignUp = () => {
   const router = useRouter();
 
@@ -17,8 +19,20 @@ export const useSignUp = () => {
     mutationKey: ["signup"],
     mutationFn: (credentials: SignUpCredentials) => signUp(credentials),
     onSuccess: (data) => {
-      console.log("Signup successful, redirecting to signin", data);
-      router.push("/setup-profile");
+      console.log("Signup successful", data);
+      // Clear store after successful signup
+      useSignupStore.setState({
+        step1: { name: "", email: "", password: "", role: "" },
+        step2: {
+          bio: "",
+          storeName: "",
+          profileImage: "",
+        },
+      });
+      router.push("/dashboards/seller"); // or seller based on role
+    },
+    onError: (error: Error) => {
+      console.error("Signup error:", error.message);
     },
   });
 };
