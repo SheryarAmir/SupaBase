@@ -9,7 +9,6 @@ import {
 } from "@/services/auth.services";
 import { useRouter } from "next/navigation";
 import { SignUpCredentials, SignInCredentials } from "@/types/auth";
-import { useSignupStore } from "@/store/signupStore";
 
 // Hook for user sign-up with complete profile data
 export const useSignUp = () => {
@@ -20,16 +19,7 @@ export const useSignUp = () => {
     mutationFn: (credentials: SignUpCredentials) => signUp(credentials),
     onSuccess: (data) => {
       console.log("Signup successful", data);
-      // Clear store after successful signup
-      useSignupStore.setState({
-        step1: { name: "", email: "", password: "", role: "" },
-        step2: {
-          bio: "",
-          storeName: "",
-          profileImage: "",
-        },
-      });
-      router.push("/dashboards/seller"); // or seller based on role
+      router.push("/signin");
     },
     onError: (error: Error) => {
       console.error("Signup error:", error.message);
@@ -37,7 +27,7 @@ export const useSignUp = () => {
   });
 };
 
-// Hook for Google sign-in
+// Hook for Google sign-in with role
 export const useGoogleSignIn = () => {
   const router = useRouter();
 
@@ -49,7 +39,7 @@ export const useGoogleSignIn = () => {
     },
     onSuccess: (data) => {
       console.log("Google sign in successful:", data);
-      router.push("/");
+      router.push("/dashboards/seller");
     },
   });
 };

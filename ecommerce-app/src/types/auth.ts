@@ -3,9 +3,7 @@ export interface SignUpCredentials {
   password: string;
   name: string;
   role: "seller" | "buyer";
-  bio: string;
-  storeName: string;
-  profileImage?: string;
+  
 }
 
 export interface SignInCredentials {

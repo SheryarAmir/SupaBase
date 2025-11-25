@@ -2,10 +2,9 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-// import { useSignUp } from "@/hooks/Authhooks/useAuth.hook";
+import { useSignUp } from "@/hooks/Authhooks/useAuth.hook";
 import Link from "next/link";
 import { SignUpFormData, signUpSchema } from "@/schema/auth.schema";
-import { useSignupStore } from "@/store/signupStore";
 import { useRouter } from "next/navigation";
 
 export default function SignUp() {
@@ -18,15 +17,12 @@ export default function SignUp() {
     resolver: zodResolver(signUpSchema),
   });
 
-  // const { mutate: signUp, isPending, error: submitError } = useSignUp();
-  const { setStep1 } = useSignupStore();
+  const { mutate: signUp, isPending, error: submitError } = useSignUp();
+ 
 
   const onSubmit = (data: SignUpFormData) => {
     console.log("signup data", data);
-    // signUp(data);
-
-    setStep1(data); // save in store
-    router.push("/setup-profile");
+    signUp(data)
   };
 
   return (
@@ -131,19 +127,19 @@ export default function SignUp() {
             </div>
           </div>
 
-          {/* {submitError && (
+          {/* { {submitError && (
             <div className="text-red-500 text-sm text-center">
               {submitError.message}
             </div>
-          )} */}
+          )} } */}
 
           <div>
             <button
               type="submit"
-              // disabled={isPending}
+              disabled={isPending}
               className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 `}
             >
-              {/* {isPending ? "Signing up..." : "Sign up"} */}
+              {isPending ? "Signing up..." : "Sign up"}
             </button>
           </div>
 
