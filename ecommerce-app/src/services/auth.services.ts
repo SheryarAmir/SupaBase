@@ -26,14 +26,21 @@ export const signUp = async ({
   password,
   name,
   role,
+  profileImage,
+  contactNumber,
+  storeDescription,
 }: SignUpCredentials) => {
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
+    
     options: {
       data: {
         name,
         role,
+        profileImage,
+        contactNumber,
+        storeDescription,
       },
     },
   });
@@ -48,6 +55,9 @@ export const signUp = async ({
         name,
         role,
         email,
+        profileImage,
+        contactNumber,
+        storeDescription,
       },
     ]);
 

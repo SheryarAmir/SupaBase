@@ -1,13 +1,19 @@
 "use client";
-
+ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSignUp } from "@/hooks/Authhooks/useAuth.hook";
 import Link from "next/link";
 import { SignUpFormData, signUpSchema } from "@/schema/auth.schema";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { sellerProfileImage } from "@/services/sellerProfileImage.service";
 
 export default function SignUp() {
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  
+
+
   const router = useRouter();
   const {
     register,
@@ -18,12 +24,77 @@ export default function SignUp() {
   });
 
   const { mutate: signUp, isPending, error: submitError } = useSignUp();
- 
 
-  const onSubmit = (data: SignUpFormData) => {
-    console.log("signup data", data);
-    signUp(data)
+  
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file size (max 5MB)
+      if (file.size > 5000000) {
+        alert("Image must be less than 5MB");
+        return;
+      }
+
+      // Validate file type
+      if (
+        !["image/jpeg", "image/jpg", "image/png", "image/webp"].includes(
+          file.type
+        )
+      ) {
+        alert("Only .jpg, .jpeg, .png and .webp formats are supported");
+        return;
+      }
+
+      setImageFile(file);
+     
+    }
   };
+
+  /* send the data to hook*/
+  const onSubmit = async (data: SignUpFormData) => {
+    console.log("this is the data sending to backend", data);
+    try {
+      let imageUrl = undefined;
+
+      // Handle image upload if a file was selected
+      if (imageFile) {
+        toast.loading("Uploading image...");
+        imageUrl = await sellerProfileImage(imageFile);
+        console.log("the image url", imageFile);
+        toast.dismiss();
+      }
+
+      // Create product data with image_url
+      signUp(
+        {
+          name: data.name,
+          role:data.role,
+          password:data.password,
+          email: data.email,
+          profileImage: imageUrl,
+          contactNumber:data.contactNumber,
+          storeDescription:data.storeDescription
+          
+
+
+        },
+
+        {
+          onSuccess: () => {
+            toast.success("Product added successfully!");
+          },
+          onError: (error) => {
+            toast.error(`Failed to add product: ${error.message}`);
+          },
+        }
+      );
+    } catch (error) {
+      console.error("Error in form submission:", error);
+      toast.error("Failed to upload image");
+    }
+  };
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -35,6 +106,35 @@ export default function SignUp() {
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
           <div className="rounded-md shadow-sm space-y-4">
+            <div>
+              {/* profile image */}
+              <label
+                htmlFor="profileImage"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Profile Image
+              </label>
+
+              <input
+                {...register("profileImage")}
+                className="mt-1 appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                            id="profileImage"
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageChange}
+                            disabled={isPending}
+              />
+              {errors.profileImage && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.profileImage?.message as string}
+                </p>
+              )}
+            </div>
+
+
+
+
+            {/* name */}
             <div>
               <label
                 htmlFor="name"
@@ -75,7 +175,49 @@ export default function SignUp() {
                 </p>
               )}
             </div>
+            {/* contact number */}
+            <div>
+              <label
+                htmlFor="contactNumber"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Contact Number
+              </label>
+              <input
+                {...register("contactNumber")}
+                id="contactNumber"
+                type="tel"
+                className="mt-1 appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                placeholder="+1 555 123 4567"
+              />
+              {errors.contactNumber && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.contactNumber.message}
+                </p>
+              )}
+            </div>
 
+            {/* store description */}
+            <div>
+              <label
+                htmlFor="storeDescription"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Store Description
+              </label>
+              <textarea
+                {...register("storeDescription")}
+                id="storeDescription"
+                rows={4}
+                className="mt-1 appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                placeholder="Tell customers about your store..."
+              />
+              {errors.storeDescription && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.storeDescription.message}
+                </p>
+              )}
+            </div>
             {/* role */}
             <div>
               <label

@@ -3,6 +3,10 @@ export interface SignUpCredentials {
   password: string;
   name: string;
   role: "seller" | "buyer";
+  image?: FileList; // For form input
+  profileImage?: string;
+  contactNumber:string
+  storeDescription:string
   
 }
 
