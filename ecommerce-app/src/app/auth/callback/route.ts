@@ -23,18 +23,7 @@ export async function GET(request: Request) {
 
     const user = session?.user;
 
-    if (user) {
-      console.log("User attributes:", user);
-
-      // STEP 2: Insert or update seller profile
-      const { error: insertError } = await supabase.from("profiles").upsert({
-        id: user.id, // match auth.users.id
-        name: user.user_metadata.full_name,
-        email: user.email,
-        role:"seller",
-  
-      });
-    }
+ 
   }
   return NextResponse.redirect(new URL("/dashboards/seller", requestUrl.origin));
 }

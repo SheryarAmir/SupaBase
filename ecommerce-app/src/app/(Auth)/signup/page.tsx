@@ -7,7 +7,7 @@ import Link from "next/link";
 import { SignUpFormData, signUpSchema } from "@/schema/auth.schema";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { sellerProfileImage } from "@/services/sellerProfileImage.service";
+import { sellerProfileImage } from "@/services/seller/sellerProfileImage.service";
 
 export default function SignUp() {
   const [imageFile, setImageFile] = useState<File | null>(null);

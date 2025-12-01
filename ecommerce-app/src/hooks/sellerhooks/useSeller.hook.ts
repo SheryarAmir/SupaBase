@@ -5,7 +5,7 @@ import {
   addProduct,
   deleteProduct,
   updateProduct,
-} from "@/services/seller.services";
+} from "@/services/seller/seller.service";
 import { CreateProductPayload, IncommingProductData } from "@/types/product";
 
 // sheryar amir

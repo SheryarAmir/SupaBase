@@ -6,7 +6,7 @@ import {
   addToCart,
   updateCartItemQuantity,
   removeFromCart,
-} from "@/services/buyer.services";
+} from "@/services/buyer/buyer.services";
 import { supabase } from "@/constant/supabase-client";
 
 // Hook to get all products

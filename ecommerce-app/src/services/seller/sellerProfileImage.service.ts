@@ -23,7 +23,7 @@ export const sellerProfileImage = async (file: File): Promise<string> => {
     // Create a unique file name
     const fileExt = file.name.split(".").pop();
     const fileName = `profile_${Math.random()
-      .toString(36)
+      .toString(36) 
       .substring(2)}_${Date.now()}.${fileExt}`;
     const filePath = `profile-images/${fileName}`;
 

@@ -39,7 +39,7 @@ export const useGoogleSignIn = () => {
     },
     onSuccess: (data) => {
       console.log("Google sign in successful:", data);
-      router.push("/dashboards/seller");
+   
     },
   });
 };

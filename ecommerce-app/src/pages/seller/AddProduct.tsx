@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAddProduct } from "@/hooks/sellerhooks/useSeller.hook";
 import { useSignOut } from "@/hooks/Authhooks/useAuth.hook";
-import { uploadImage } from "@/services/upload.services";
+import { uploadImage } from "@/services/seller/upload.services";
 import { Button } from "@/components/ui/button";
 
 import {
