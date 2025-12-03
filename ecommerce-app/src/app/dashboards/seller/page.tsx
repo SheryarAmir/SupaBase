@@ -9,7 +9,7 @@ import AddProduct from "@/pages/seller/AddProduct";
 import { Orders } from "@/pages/seller/Orders";
 import { Messages } from "@/pages/seller/Messages";
 import { Analytics } from "@/pages/seller/Analytics";
-import { ProfileSettings } from "@/pages/seller/ProfileSettings";
+import ProfileSettings  from "@/pages/seller/ProfileSettings";
 import { AccountSettings } from "@/pages/seller/AccountSettings";
 
 const Index = () => {
