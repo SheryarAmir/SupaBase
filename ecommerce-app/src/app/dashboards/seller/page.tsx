@@ -16,7 +16,7 @@ const Index = () => {
   const [activeSection, setActiveSection] = useState("dashboard");
 
   const renderSection = () => {
-    switch (activeSection) {
+    switch (activeSection) {  
       case "dashboard":
         return <DashboardOverview />;
       case "products":

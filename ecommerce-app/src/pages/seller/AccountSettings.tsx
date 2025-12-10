@@ -24,6 +24,7 @@ export function AccountSettings() {
   const newPassword = watch("newPassword");
 
   const onSubmit = (data: AccountFormData) => {
+    
     console.log("Password update:", data);
     toast.success("Password updated successfully!", {
       description: "Your account password has been changed.",
@@ -40,6 +41,8 @@ export function AccountSettings() {
         description: "Your account will be deleted within 24 hours.",
       });
     }
+
+    console.log("you want to delete the account")
   };
 
   return (
