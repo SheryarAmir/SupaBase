@@ -10,8 +10,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AlertTriangle } from "lucide-react";
-import { toast } from "sonner";
 import type { AccountFormData } from "@/types/dashboard";
+import { useAccountSettings } from "@/hooks/sellerhooks/AccountSettings.hook";
 
 export function AccountSettings() {
   const {
@@ -22,27 +22,36 @@ export function AccountSettings() {
   } = useForm<AccountFormData>();
 
   const newPassword = watch("newPassword");
+  const {
+    updatePassword,
+    deleteAccount,
+    isUpdatingPassword,
+    isDeletingAccount,
+  } = useAccountSettings();
 
-  const onSubmit = (data: AccountFormData) => {
-    
-    console.log("Password update:", data);
-    toast.success("Password updated successfully!", {
-      description: "Your account password has been changed.",
-    });
+  const onSubmit = async (data: AccountFormData) => {
+    try {
+      await updatePassword({
+        currentPassword: data.currentPassword,
+        newPassword: data.newPassword,
+      });
+    } catch (error) {
+      console.error("Password update failed", error);
+    }
   };
 
-  const handleDeleteAccount = () => {
+  const handleDeleteAccount = async () => {
     if (
       confirm(
         "Are you sure you want to delete your account? This action is irreversible and will permanently delete all your data."
       )
     ) {
-      toast.error("Account deletion initiated", {
-        description: "Your account will be deleted within 24 hours.",
-      });
+      try {
+        await deleteAccount();
+      } catch (error) {
+        console.error("Account deletion failed", error);
+      }
     }
-
-    console.log("you want to delete the account")
   };
 
   return (
@@ -125,9 +134,10 @@ export function AccountSettings() {
 
             <Button
               type="submit"
+              disabled={isUpdatingPassword}
               className="bg-gradient-to-r from-primary to-accent"
             >
-              Update Password
+              {isUpdatingPassword ? "Updating..." : "Update Password"}
             </Button>
           </form>
         </CardContent>
@@ -152,8 +162,12 @@ export function AccountSettings() {
                 permanently delete your store, all products, orders, and
                 customer data.
               </p>
-              <Button variant="destructive" onClick={handleDeleteAccount}>
-                Delete My Account
+              <Button
+                variant="destructive"
+                onClick={handleDeleteAccount}
+                disabled={isDeletingAccount}
+              >
+                {isDeletingAccount ? "Deleting..." : "Delete My Account"}
               </Button>
             </div>
           </div>
