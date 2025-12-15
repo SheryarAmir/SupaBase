@@ -1,5 +1,33 @@
 import { supabase } from "@/constant/supabase-client";
 
+const clearClientState = async () => {
+  // Guard for non-browser environments
+  if (typeof window === "undefined") return;
+
+  // Clear all cookies by expiring them
+  document.cookie.split(";").forEach((cookie) => {
+    const eqPos = cookie.indexOf("=");
+    const name = eqPos > -1 ? cookie.substring(0, eqPos) : cookie;
+    document.cookie = `${name.trim()}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+  });
+
+  try {
+    localStorage.clear();
+    sessionStorage.clear();
+  } catch (error) {
+    console.warn("Failed to clear web storage", error);
+  }
+
+  if ("caches" in window) {
+    try {
+      const cacheNames = await caches.keys();
+      await Promise.all(cacheNames.map((cacheName) => caches.delete(cacheName)));
+    } catch (error) {
+      console.warn("Failed to clear caches", error);
+    }
+  }
+};
+
 interface UpdatePasswordPayload {
   currentPassword: string;
   newPassword: string;
@@ -39,6 +67,12 @@ export const updatePassword = async ({
   console.log("updateUser result", { data, error });
 
   if (error) throw error;
+
+  // Sign out to invalidate existing sessions after password change
+  await supabase.auth.signOut();
+
+  // Clear client-side cookies, storage, and caches to prevent stale sessions
+  await clearClientState();
 
   return data;
 };
