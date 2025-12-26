@@ -32,10 +32,14 @@ export const useAccountSettings = () => {
   const deleteAccountMutation = useMutation({
     mutationKey: ["account", "delete"],
     mutationFn: () => deleteAccount(),
-    onSuccess: () => {
-      toast.error("Account deletion initiated", {
-        description: "Your account will be deleted within 24 hours.",
+    onSuccess: async () => {
+      toast.success("Account deleted", {
+        description: "Your account has been deleted. Redirecting...",
       });
+      // Redirect to home page after successful deletion
+      setTimeout(() => {
+        router.push("/");
+      }, 1500);
     },
     onError: (error: Error) => {
       toast.error("Account deletion failed", {

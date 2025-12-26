@@ -77,30 +77,61 @@ export const updatePassword = async ({
   return data;
 };
 
-// Delete the signed-in user's profile row and sign them out
+// Delete the signed-in user's profile row and auth user
 export const deleteAccount = async () => {
   console.log("deleteAccount called");
 
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
+  try {
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
 
-  console.log("current user response", { user, userError });
+    console.log("current user response", { user, userError });
 
-  if (userError) throw userError;
-  if (!user) throw new Error("User not authenticated");
+    if (userError) throw userError;
+    if (!user) throw new Error("User not authenticated");
 
-  // Remove profile data; adjust table/key as needed
-  const { error } = await supabase.from("profiles").delete().eq("id", user.id);
+    const userId = user.id;
 
-  console.log("delete profile result", { error });
+    // Remove profile data first
+    const { error: deleteError } = await supabase
+      .from("profiles")
+      .delete()
+      .eq("id", userId);
 
-  if (error) throw error;
+    console.log("delete profile result", { deleteError });
 
-  await supabase.auth.signOut();
+    if (deleteError) throw deleteError;
 
-  console.log("sign out completed");
+    // Call API route to delete auth user (requires admin API)
+    const response = await fetch("/api/auth/delete-account", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ userId }),
+    });
 
-  return { success: true };
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Failed to delete account");
+    }
+
+    console.log("Auth user deleted successfully");
+
+    // Sign out after deletion
+    const { error: signOutError } = await supabase.auth.signOut();
+    console.log("sign out completed", { signOutError });
+
+    if (signOutError) throw signOutError;
+
+    // Clear client-side state
+    await clearClientState();
+
+    return { success: true };
+  } catch (error) {
+    console.error("deleteAccount error:", error);
+    throw error;
+  }
 };
