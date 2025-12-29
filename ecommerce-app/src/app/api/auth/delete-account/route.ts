@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(request: NextRequest) {
   try {
     const supabaseAdminUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const supabaseServiceKey =process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
     if (!supabaseAdminUrl || !supabaseServiceKey) {
       return NextResponse.json(
@@ -38,7 +38,13 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error("Delete user error:", error);
-      throw error;
+      // Don't throw - the user might already be deleted or the error is expected
+      // Still return success if the user is not found (already deleted)
+      if (error.status === 404 || error.message?.includes("not found")) {
+        console.log("User already deleted or not found");
+      } else {
+        throw error;
+      }
     }
 
     console.log("User deleted successfully:", userId);

@@ -93,18 +93,37 @@ export const deleteAccount = async () => {
     if (!user) throw new Error("User not authenticated");
 
     const userId = user.id;
+    const userEmail = user.email;
 
-    // Remove profile data first
+    console.log("Starting account deletion for user:", userId);
+
+    // Step 1: Remove profile data first
+    console.log("Step 1: Deleting profile data...");
     const { error: deleteError } = await supabase
       .from("profiles")
       .delete()
       .eq("id", userId);
 
-    console.log("delete profile result", { deleteError });
+    if (deleteError) {
+      console.error("Profile deletion error:", deleteError);
+      // Don't throw - continue even if profile doesn't exist
+    } else {
+      console.log("Profile deleted successfully");
+    }
 
-    if (deleteError) throw deleteError;
+    // // Step 2: Remove any other related data (orders, products, etc.)
+    // console.log("Step 2: Deleting related data...");
+    // try {
+    //   await supabase.from("products").delete().eq("seller_id", userId);
+    //   await supabase.from("orders").delete().eq("seller_id", userId);
+    //   console.log("Related data cleaned up");
+    // } catch (cleanupError) {
+    //   console.warn("Warning during cleanup:", cleanupError);
+    //   // Continue even if cleanup fails
+    // }
 
-    // Call API route to delete auth user (requires admin API)
+    // Step 3: Call API route to delete auth user (requires admin API)
+    console.log("Step 3: Deleting auth user...");
     const response = await fetch("/api/auth/delete-account", {
       method: "POST",
       headers: {
@@ -113,22 +132,30 @@ export const deleteAccount = async () => {
       body: JSON.stringify({ userId }),
     });
 
+    const responseData = await response.json();
+    
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || "Failed to delete account");
+      console.error("API response not ok:", response.status, responseData);
+      throw new Error(responseData.error || "Failed to delete account");
+    } 
+
+    console.log("Auth user deleted successfully:", responseData);
+
+    // Step 4: Sign out after deletion
+    console.log("Step 4: Signing out...");
+    const { error: signOutError } = await supabase.auth.signOut();
+    console.log("Sign out completed", { signOutError });
+
+    if (signOutError) {
+      console.warn("Warning during sign out:", signOutError);
+      // Don't throw - user is already deleted
     }
 
-    console.log("Auth user deleted successfully");
-
-    // Sign out after deletion
-    const { error: signOutError } = await supabase.auth.signOut();
-    console.log("sign out completed", { signOutError });
-
-    if (signOutError) throw signOutError;
-
-    // Clear client-side state
+    // Step 5: Clear client-side state
+    console.log("Step 5: Clearing client state...");
     await clearClientState();
 
+    console.log("Account deletion completed successfully for:", userEmail);
     return { success: true };
   } catch (error) {
     console.error("deleteAccount error:", error);
