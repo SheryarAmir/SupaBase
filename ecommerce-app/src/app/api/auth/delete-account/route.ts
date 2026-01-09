@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(request: NextRequest) {
   try {
     const supabaseAdminUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseServiceKey =process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const supabaseServiceKey =process.env.SUPABASE_SERVICE_ROLE_KEY;
 
     if (!supabaseAdminUrl || !supabaseServiceKey) {
       return NextResponse.json(

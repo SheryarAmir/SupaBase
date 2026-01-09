@@ -122,7 +122,7 @@ export const deleteAccount = async () => {
     //   // Continue even if cleanup fails
     // }
 
-    // Step 3: Call API route to delete auth user (requires admin API)
+    // Step 3: Call API route to delete auth user (requires admin API)k
     console.log("Step 3: Deleting auth user...");
     const response = await fetch("/api/auth/delete-account", {
       method: "POST",

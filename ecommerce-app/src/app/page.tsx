@@ -67,7 +67,7 @@ export default function Home() {
               <Link href="/signin">Sign in</Link>
             </Button>
             <Button asChild size="sm" className="shadow-sm">
-              <Link href="/(Auth)/signup">
+              <Link href="/signup">
                 Get started
                 <ArrowRight className="ml-1.5 size-4" />
               </Link>
