@@ -2,6 +2,9 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import {
   getAllProducts,
+  getProduct,
+  searchProducts,
+  filterProducts,
   getCart,
   addToCart,
   updateCartItemQuantity,
@@ -14,6 +17,36 @@ export const useProducts = () => {
   return useQuery({
     queryKey: ["products"],
     queryFn: getAllProducts,
+  });
+};
+
+// Hook to get a single product
+export const useProduct = (id: string) => {
+  return useQuery({
+    queryKey: ["product", id],
+    queryFn: () => getProduct(id),
+    enabled: !!id,
+  });
+};
+
+// Hook to search products
+export const useSearchProducts = (searchTerm: string) => {
+  return useQuery({
+    queryKey: ["products", "search", searchTerm],
+    queryFn: () => searchProducts(searchTerm),
+    enabled: searchTerm.length > 0,
+  });
+};
+
+// Hook to filter products
+export const useFilterProducts = (filters: {
+  category?: string;
+  minPrice?: number;
+  maxPrice?: number;
+}) => {
+  return useQuery({
+    queryKey: ["products", "filter", filters],
+    queryFn: () => filterProducts(filters),
   });
 };
 

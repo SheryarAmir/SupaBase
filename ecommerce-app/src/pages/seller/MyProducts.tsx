@@ -8,8 +8,10 @@ import {
 } from "@/hooks/sellerhooks/useSeller.hook";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, Trash2, Package } from "lucide-react";
+import { Loader2, Trash2, Package, Edit2, Save, X } from "lucide-react";
+import { toast } from "sonner";
 
 export default function ProductsPage() {
   const { data: products, isLoading, error } = useGetAllProducts();
@@ -17,7 +19,7 @@ export default function ProductsPage() {
   const updateProduct = useUpdateTodo();
 
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [newTitle, setNewTitle] = useState("");
+  const [editingStock, setEditingStock] = useState<number>(0);
 
   console.log("data come from supabase", products);
 
@@ -60,13 +62,31 @@ export default function ProductsPage() {
     }
   };
 
-  const handleUpdate = async (id: string) => {
-    await updateProduct.mutateAsync({
-      id,
-      updates: { title: newTitle },
-    });
+  const handleEditStock = (product: any) => {
+    setEditingId(product.id);
+    setEditingStock(product.stock);
+  };
+
+  const handleSaveStock = async (id: string) => {
+    if (editingStock < 0) {
+      toast.error("Stock cannot be negative");
+      return;
+    }
+    try {
+      await updateProduct.mutateAsync({
+        id,
+        updates: { stock: editingStock },
+      });
+      toast.success("Stock updated successfully");
+      setEditingId(null);
+    } catch (error: any) {
+      toast.error(error?.message || "Failed to update stock");
+    }
+  };
+
+  const handleCancelEdit = () => {
     setEditingId(null);
-    setNewTitle("");
+    setEditingStock(0);
   };
 
   return (
@@ -116,15 +136,46 @@ export default function ProductsPage() {
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-muted-foreground">Stock:</span>
-                      <span
-                        className={`font-semibold ${
-                          product.stock > 0
-                            ? "text-green-600"
-                            : "text-destructive"
-                        }`}
-                      >
-                        {product.stock} units
-                      </span>
+                      {editingId === product.id ? (
+                        <div className="flex items-center gap-2">
+                          <Input
+                            type="number"
+                            value={editingStock}
+                            onChange={(e) =>
+                              setEditingStock(Number(e.target.value))
+                            }
+                            className="w-20 h-8"
+                            min="0"
+                          />
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleSaveStock(product.id)}
+                            disabled={updateProduct.isPending}
+                            className="h-8 w-8 p-0"
+                          >
+                            <Save className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={handleCancelEdit}
+                            className="h-8 w-8 p-0"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <span
+                          className={`font-semibold ${
+                            product.stock > 0
+                              ? "text-green-600"
+                              : "text-destructive"
+                          }`}
+                        >
+                          {product.stock} units
+                        </span>
+                      )}
                     </div>
                     <div className="flex justify-between items-start">
                       <span className="text-muted-foreground">Email:</span>
@@ -136,6 +187,16 @@ export default function ProductsPage() {
                 </div>
 
                 <div className="flex gap-2 pt-4 border-t border-border">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleEditStock(product)}
+                    disabled={editingId === product.id}
+                    className="flex-1"
+                  >
+                    <Edit2 className="w-4 h-4 mr-1" />
+                    Edit Stock
+                  </Button>
                   <Button
                     variant="destructive"
                     size="sm"

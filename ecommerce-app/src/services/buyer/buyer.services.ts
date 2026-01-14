@@ -1,10 +1,10 @@
 import { supabase } from "@/constant/supabase-client";
 import { Product } from "@/types/product";
 
-// Get all products
+// Get all products (from sellerproduct table)
 export const getAllProducts = async () => {
   const { data, error } = await supabase
-    .from("products")
+    .from("sellerproduct")
     .select("*")
     .order("created_at", { ascending: false });
 
@@ -15,13 +15,53 @@ export const getAllProducts = async () => {
 // Get a single product
 export const getProduct = async (id: string) => {
   const { data, error } = await supabase
-    .from("products")
+    .from("sellerproduct")
     .select("*")
     .eq("id", id)
     .single();
 
   if (error) throw error;
   return data as Product;
+};
+
+// Search products by title or description
+export const searchProducts = async (searchTerm: string) => {
+  const { data, error } = await supabase
+    .from("sellerproduct")
+    .select("*")
+    .or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`)
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+  return data as Product[];
+};
+
+// Filter products by category, price range
+export const filterProducts = async (filters: {
+  category?: string;
+  minPrice?: number;
+  maxPrice?: number;
+}) => {
+  let query = supabase.from("sellerproduct").select("*");
+
+  if (filters.category) {
+    query = query.eq("category", filters.category);
+  }
+
+  if (filters.minPrice !== undefined) {
+    query = query.gte("price", filters.minPrice);
+  }
+
+  if (filters.maxPrice !== undefined) {
+    query = query.lte("price", filters.maxPrice);
+  }
+
+  query = query.order("created_at", { ascending: false });
+
+  const { data, error } = await query;
+
+  if (error) throw error;
+  return data as Product[];
 };
 
 // Get cart items for a user
