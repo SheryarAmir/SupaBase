@@ -6,9 +6,12 @@ import {
   searchProducts,
   filterProducts,
   getCart,
+  getCartCount,
   addToCart,
   updateCartItemQuantity,
   removeFromCart,
+  createOrder,
+  getUserOrders,
 } from "@/services/buyer/buyer.services";
 import { supabase } from "@/constant/supabase-client";
 
@@ -59,8 +62,23 @@ export const useCart = (userId: string) => {
   });
 };
 
+// Hook to get cart count
+export const useCartCount = () => {
+  const userId = useUserId();
+  
+  return useQuery({
+    queryKey: ["cartCount", userId],
+    queryFn: () => {
+      if (!userId) return 0;
+      return getCartCount(userId);
+    },
+    enabled: !!userId,
+    refetchInterval: 2000, // Refetch every 2 seconds to keep count updated
+  });
+};
+
 // Hook to get current user ID
-const useUserId = () => {
+export const useUserId = () => {
   const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -95,6 +113,7 @@ export const useAddToCart = () => {
     onSuccess: () => {
       if (userId) {
         queryClient.invalidateQueries({ queryKey: ["cart", userId] });
+        queryClient.invalidateQueries({ queryKey: ["cartCount", userId] });
       }
     },
   });
@@ -119,6 +138,7 @@ export const useUpdateCartItem = () => {
     onSuccess: () => {
       if (userId) {
         queryClient.invalidateQueries({ queryKey: ["cart", userId] });
+        queryClient.invalidateQueries({ queryKey: ["cartCount", userId] });
       }
     },
   });
@@ -137,7 +157,49 @@ export const useRemoveFromCart = () => {
     onSuccess: () => {
       if (userId) {
         queryClient.invalidateQueries({ queryKey: ["cart", userId] });
+        queryClient.invalidateQueries({ queryKey: ["cartCount", userId] });
       }
     },
+  });
+};
+
+// Hook to create order
+export const useCreateOrder = () => {
+  const queryClient = useQueryClient();
+  const userId = useUserId();
+
+  return useMutation({
+    mutationFn: async (orderData: {
+      shipping_address: string;
+      shipping_city: string;
+      shipping_state: string;
+      shipping_zip: string;
+      shipping_country: string;
+      payment_method: string;
+    }) => {
+      if (!userId) throw new Error("User not authenticated");
+      return createOrder(orderData);
+    },
+    onSuccess: () => {
+      if (userId) {
+        queryClient.invalidateQueries({ queryKey: ["cart", userId] });
+        queryClient.invalidateQueries({ queryKey: ["cartCount", userId] });
+        queryClient.invalidateQueries({ queryKey: ["orders", userId] });
+      }
+    },
+  });
+};
+
+// Hook to get user orders
+export const useUserOrders = () => {
+  const userId = useUserId();
+
+  return useQuery({
+    queryKey: ["orders", userId],
+    queryFn: () => {
+      if (!userId) return [];
+      return getUserOrders(userId);
+    },
+    enabled: !!userId,
   });
 };

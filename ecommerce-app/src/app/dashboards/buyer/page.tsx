@@ -8,6 +8,7 @@ import { useSwitchRole } from "@/hooks/sellerhooks/profileSettings.hook";
 import { Store, ShoppingBag } from "lucide-react";
 import { toast } from "sonner";
 import { useProfile } from "@/hooks/sellerhooks/profileSettings.hook";
+import { CartCounter } from "@/components/CartCounter";
 
 export default function BuyerDashboard() {
   const { data: profile } = useProfile();
@@ -33,6 +34,7 @@ export default function BuyerDashboard() {
             <div className="flex items-center justify-between w-full">
               <h2 className="text-xl font-semibold">Buyer Dashboard</h2>
               <div className="flex items-center gap-4">
+                <CartCounter />
                 <Button
                   variant="outline"
                   size="sm"

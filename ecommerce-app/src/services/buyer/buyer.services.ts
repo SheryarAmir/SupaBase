@@ -66,18 +66,42 @@ export const filterProducts = async (filters: {
 
 // Get cart items for a user
 export const getCart = async (userId: string) => {
-  const { data, error } = await supabase
+  // First get cart items
+  const { data: cartItems, error: cartError } = await supabase
     .from("cart_items")
-    .select(
-      `
-      *,
-      products (*)
-    `
-    )
+    .select("*")
+    .eq("user_id", userId);
+
+  if (cartError) throw cartError;
+  if (!cartItems || cartItems.length === 0) return [];
+
+  // Then get product details for each cart item
+  const productIds = cartItems.map((item) => item.product_id);
+  const { data: products, error: productsError } = await supabase
+    .from("sellerproduct")
+    .select("id, title, description, price, stock, image_url, category")
+    .in("id", productIds);
+
+  if (productsError) throw productsError;
+
+  // Combine cart items with product data
+  const cartWithProducts = cartItems.map((item) => ({
+    ...item,
+    sellerproduct: products?.find((p) => p.id === item.product_id) || null,
+  }));
+
+  return cartWithProducts;
+};
+
+// Get cart count for a user
+export const getCartCount = async (userId: string) => {
+  const { data: items, error } = await supabase
+    .from("cart_items")
+    .select("quantity")
     .eq("user_id", userId);
 
   if (error) throw error;
-  return data;
+  return items?.reduce((sum, item) => sum + (item.quantity || 0), 0) || 0;
 };
 
 // Add item to cart
@@ -134,4 +158,132 @@ export const removeFromCart = async (itemId: string) => {
   const { error } = await supabase.from("cart_items").delete().eq("id", itemId);
 
   if (error) throw error;
+};
+
+// Create order from cart
+export const createOrder = async (orderData: {
+  shipping_address: string;
+  shipping_city: string;
+  shipping_state: string;
+  shipping_zip: string;
+  shipping_country: string;
+  payment_method: string;
+}) => {
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError) throw userError;
+  if (!user) throw new Error("User not authenticated");
+
+  const buyerId = user.id;
+
+  // Get cart items
+  const cartItems = await getCart(buyerId);
+
+  if (!cartItems || cartItems.length === 0) {
+    throw new Error("Cart is empty");
+  }
+
+  // Group items by seller
+  const itemsBySeller = new Map<string, any[]>();
+  
+  for (const item of cartItems) {
+    // Get product to find seller_id (user_id in sellerproduct table)
+    const { data: product } = await supabase
+      .from("sellerproduct")
+      .select("user_id, price")
+      .eq("id", item.product_id)
+      .single();
+
+    if (!product) continue;
+
+    const sellerId = product.user_id;
+    if (!itemsBySeller.has(sellerId)) {
+      itemsBySeller.set(sellerId, []);
+    }
+    itemsBySeller.get(sellerId)!.push({
+      ...item,
+      price: product.price,
+    });
+  }
+
+  // Create orders for each seller
+  const orders = [];
+  for (const [sellerId, items] of itemsBySeller.entries()) {
+    const totalAmount = items.reduce(
+      (sum, item) => sum + (item.price || 0) * (item.quantity || 0),
+      0
+    );
+
+    // Create order
+    const { data: order, error: orderError } = await supabase
+      .from("orders")
+      .insert([
+        {
+          buyer_id: buyerId,
+          seller_id: sellerId,
+          total_amount: totalAmount,
+          ...orderData,
+        },
+      ])
+      .select()
+      .single();
+
+    if (orderError) throw orderError;
+
+    // Create order items
+    const orderItems = items.map((item) => ({
+      order_id: order.id,
+      product_id: item.product_id,
+      quantity: item.quantity,
+      price: item.price,
+    }));
+
+    const { error: itemsError } = await supabase
+      .from("order_items")
+      .insert(orderItems);
+
+    if (itemsError) throw itemsError;
+
+    orders.push(order);
+  }
+
+  // Clear cart after successful order
+  const { error: clearError } = await supabase
+    .from("cart_items")
+    .delete()
+    .eq("user_id", buyerId);
+
+  if (clearError) {
+    console.warn("Failed to clear cart:", clearError);
+  }
+
+  return orders;
+};
+
+// Get user orders
+export const getUserOrders = async (userId: string) => {
+  const { data, error } = await supabase
+    .from("orders")
+    .select(
+      `
+      *,
+      order_items (
+        *,
+        sellerproduct:product_id (
+          id,
+          title,
+          image_url,
+          price
+        )
+      )
+    `
+    )
+    .eq("buyer_id", userId)
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+  return data;
 };
