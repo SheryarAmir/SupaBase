@@ -20,6 +20,7 @@ export const useProducts = () => {
   return useQuery({
     queryKey: ["products"],
     queryFn: getAllProducts,
+    staleTime: 30000, // Consider data fresh for 30 seconds to reduce unnecessary refetches
   });
 };
 
@@ -59,6 +60,9 @@ export const useCart = (userId: string) => {
     queryKey: ["cart", userId],
     queryFn: () => getCart(userId),
     enabled: !!userId, // Only fetch if userId is available
+    staleTime: 0, // Always refetch to ensure fresh data after role switch
+    refetchOnWindowFocus: true, // Refetch when window regains focus
+    refetchOnMount: true, // Always refetch on mount
   });
 };
 
@@ -88,7 +92,19 @@ export const useUserId = () => {
       } = await supabase.auth.getSession();
       setUserId(session?.user?.id || null);
     };
+    
     getSession();
+
+    // Listen for auth state changes (e.g., role switching)
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUserId(session?.user?.id || null);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   return userId;
@@ -112,8 +128,9 @@ export const useAddToCart = () => {
     },
     onSuccess: () => {
       if (userId) {
-        queryClient.invalidateQueries({ queryKey: ["cart", userId] });
-        queryClient.invalidateQueries({ queryKey: ["cartCount", userId] });
+        // Use exact match to avoid invalidating other queries
+        queryClient.invalidateQueries({ queryKey: ["cart", userId], exact: true });
+        queryClient.invalidateQueries({ queryKey: ["cartCount", userId], exact: true });
       }
     },
   });

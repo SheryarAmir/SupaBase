@@ -33,6 +33,7 @@ export default function ProductListing() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [priceRange, setPriceRange] = useState({ min: "", max: "" });
+  const [addingProductId, setAddingProductId] = useState<string | null>(null);
 
   // Filter products based on search, category, and price
   const filteredProducts = useMemo(() => {
@@ -59,14 +60,20 @@ export default function ProductListing() {
   }, [products, searchTerm, selectedCategory, priceRange]);
 
   const handleAddToCart = (productId: string) => {
+    // Prevent multiple clicks on the same product
+    if (addingProductId === productId || isAddingToCart) return;
+    
+    setAddingProductId(productId);
     addToCart(
       { productId, quantity: 1 },
       {
         onSuccess: () => {
           toast.success("Product added to cart!");
+          setAddingProductId(null);
         },
         onError: (error: any) => {
           toast.error(error?.message || "Failed to add to cart");
+          setAddingProductId(null);
         },
       }
     );
@@ -174,8 +181,12 @@ export default function ProductListing() {
               <Card
                 key={product.id}
                 className="overflow-hidden hover:shadow-lg transition-all duration-300 hover:border-primary/50 flex flex-col h-full"
+                onClick={(e) => e.stopPropagation()}
               >
-                <Link href={`/dashboards/buyer/products/${product.id}`}>
+                <Link 
+                  href={`/dashboards/buyer/products/${product.id}`}
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <div className="relative w-full h-48 bg-muted overflow-hidden cursor-pointer">
                     <Image
                       src={product.image_url || "/placeholder.svg"}
@@ -188,7 +199,10 @@ export default function ProductListing() {
 
                 <CardContent className="flex-1 p-5 flex flex-col">
                   <div className="mb-4 flex-1">
-                    <Link href={`/dashboards/buyer/products/${product.id}`}>
+                    <Link 
+                      href={`/dashboards/buyer/products/${product.id}`}
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <h3 className="text-lg font-semibold text-foreground mb-2 line-clamp-2 hover:text-primary cursor-pointer">
                         {product.title || "Untitled Product"}
                       </h3>
@@ -227,15 +241,22 @@ export default function ProductListing() {
                   </div>
 
                   <Button
-                    onClick={() => handleAddToCart(product.id)}
-                    disabled={isAddingToCart || product.stock === 0}
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      if (addingProductId !== product.id && !isAddingToCart && product.stock > 0) {
+                        handleAddToCart(product.id);
+                      }
+                    }}
+                    disabled={addingProductId === product.id || isAddingToCart || product.stock === 0}
                     className="w-full"
                     variant={product.stock === 0 ? "outline" : "default"}
                   >
                     <ShoppingCart className="w-4 h-4 mr-2" />
                     {product.stock === 0
                       ? "Out of Stock"
-                      : isAddingToCart
+                      : addingProductId === product.id
                       ? "Adding..."
                       : "Add to Cart"}
                   </Button>

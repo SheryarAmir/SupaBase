@@ -12,7 +12,7 @@ import { useRouter } from "next/navigation";
 
 export default function Cart() {
   const userId = useUserId();
-  const { data: cartItems, isLoading } = useCart(userId || "");
+  const { data: cartItems, isLoading, error } = useCart(userId || "");
   const { mutate: updateQuantity, isPending: isUpdating } = useUpdateCartItem();
   const { mutate: removeItem, isPending: isRemoving } = useRemoveFromCart();
   const router = useRouter();
@@ -60,6 +60,39 @@ export default function Cart() {
         <div className="text-center">
           <Loader2 className="animate-spin h-8 w-8 text-primary mx-auto mb-3" />
           <p className="text-muted-foreground">Loading cart...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30 py-8 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex flex-col items-center justify-center h-96">
+            <p className="text-destructive text-lg font-semibold mb-2">
+              Error loading cart
+            </p>
+            <p className="text-muted-foreground mb-6">{error.message || "Please try again later"}</p>
+            <Button onClick={() => router.push("/dashboards/buyer")}>
+              Continue Shopping
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!userId) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30 py-8 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex flex-col items-center justify-center h-96">
+            <p className="text-muted-foreground text-lg mb-6">Please sign in to view your cart</p>
+            <Button onClick={() => router.push("/dashboards/buyer")}>
+              Continue Shopping
+            </Button>
+          </div>
         </div>
       </div>
     );

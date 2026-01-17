@@ -2,7 +2,22 @@ import { supabase } from "@/constant/supabase-client";
 import { IncommingProductData, CreateProductPayload } from "@/types/product";
 
 export const fetchAllProducts = async (): Promise<IncommingProductData[]> => {
-  const { data, error } = await supabase.from("sellerproduct").select("*");
+  // Get current logged-in user to filter products by seller
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError) throw userError;
+  if (!user) throw new Error("User not authenticated");
+
+  // Only fetch products for the current seller
+  const { data, error } = await supabase
+    .from("sellerproduct")
+    .select("*")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false });
+
   if (error) throw error;
   return data || [];
 };

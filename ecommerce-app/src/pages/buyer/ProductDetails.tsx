@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useProduct, useAddToCart } from "@/hooks/buyerhooks/useBuyer.hook";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -15,17 +16,22 @@ export default function ProductDetails() {
   const productId = params?.id as string;
   const { data: product, isLoading, error } = useProduct(productId || "");
   const { mutate: addToCart, isPending: isAddingToCart } = useAddToCart();
+  const [isAdding, setIsAdding] = useState(false);
 
   const handleAddToCart = () => {
-    if (!productId) return;
+    if (!productId || isAdding || isAddingToCart) return;
+    
+    setIsAdding(true);
     addToCart(
       { productId, quantity: 1 },
       {
         onSuccess: () => {
           toast.success("Product added to cart!");
+          setIsAdding(false);
         },
         onError: (error: any) => {
           toast.error(error?.message || "Failed to add to cart");
+          setIsAdding(false);
         },
       }
     );
@@ -139,15 +145,19 @@ export default function ProductDetails() {
             </div>
 
             <Button
-              onClick={handleAddToCart}
-              disabled={isAddingToCart || product.stock === 0}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleAddToCart();
+              }}
+              disabled={isAdding || isAddingToCart || product.stock === 0}
               size="lg"
               className="w-full"
             >
               <ShoppingCart className="w-5 h-5 mr-2" />
               {product.stock === 0
                 ? "Out of Stock"
-                : isAddingToCart
+                : isAdding || isAddingToCart
                 ? "Adding to Cart..."
                 : "Add to Cart"}
             </Button>

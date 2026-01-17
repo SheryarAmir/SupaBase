@@ -27,8 +27,11 @@ export const useAddProduct = () => {
     mutationKey: ["product"],
     mutationFn: (data: CreateProductPayload) => addProduct(data),
     onSuccess: () => {
-      // refresh user list after insert
-      queryClient.invalidateQueries({ queryKey: ["product"] });
+      // refresh seller product list after insert (only seller's products)
+      // Use exact match to avoid invalidating buyer's ["products"] query
+      queryClient.invalidateQueries({ queryKey: ["product"], exact: true });
+      // Also invalidate buyer's products query so new products appear in marketplace
+      queryClient.invalidateQueries({ queryKey: ["products"], exact: true });
     },
   });
 };
