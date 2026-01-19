@@ -15,12 +15,13 @@ import {
 } from "@/services/buyer/buyer.services";
 import { supabase } from "@/constant/supabase-client";
 
-// Hook to get all products
+// Hook to get all products (from all sellers, for buyer dashboard)
 export const useProducts = () => {
   return useQuery({
     queryKey: ["products"],
     queryFn: getAllProducts,
-    staleTime: 30000, // Consider data fresh for 30 seconds to reduce unnecessary refetches
+    staleTime: 30000,
+    refetchOnMount: "always", // Refetch when buyer dashboard mounts (e.g. after role switch)
   });
 };
 

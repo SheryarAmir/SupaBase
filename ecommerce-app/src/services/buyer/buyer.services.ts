@@ -1,7 +1,8 @@
 import { supabase } from "@/constant/supabase-client";
 import { Product } from "@/types/product";
 
-// Get all products (from sellerproduct table)
+// Get all products from all sellers (for buyer dashboard). No user_id filter.
+// Requires RLS: "Buyers can view all products" on sellerproduct (see supabase/rls-buyer-products.sql).
 export const getAllProducts = async () => {
   const { data, error } = await supabase
     .from("sellerproduct")
@@ -9,7 +10,7 @@ export const getAllProducts = async () => {
     .order("created_at", { ascending: false });
 
   if (error) throw error;
-  return data as Product[];
+  return (data || []) as Product[];
 };
 
 // Get a single product
