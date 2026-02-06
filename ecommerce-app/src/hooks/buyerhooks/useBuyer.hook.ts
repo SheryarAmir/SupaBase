@@ -17,6 +17,8 @@ import { supabase } from "@/constant/supabase-client";
 
 // Hook to get all products (from all sellers, for buyer dashboard)
 export const useProducts = () => {
+
+  console.log("useProducts called");
   return useQuery({
     queryKey: ["products"],
     queryFn: getAllProducts,

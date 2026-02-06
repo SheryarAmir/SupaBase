@@ -5,10 +5,11 @@ import { Product } from "@/types/product";
 // Requires RLS: "Buyers can view all products" on sellerproduct (see supabase/rls-buyer-products.sql).
 export const getAllProducts = async () => {
   const { data, error } = await supabase
-    .from("sellerproduct")
-    .select("*")
-    .order("created_at", { ascending: false });
-
+  .from("sellerproduct")
+  .select("*")
+  .order("created_at", { ascending: false });
+  
+  console.log("getAllProducts called");
   if (error) throw error;
   return (data || []) as Product[];
 };
@@ -111,33 +112,52 @@ export const addToCart = async (
   productId: string,
   quantity: number = 1
 ) => {
+  console.log("addToCart called", { userId, productId, quantity });
+  
   // First check if item already exists in cart
-  const { data: existingItem } = await supabase
+  const { data: existingItem, error: checkError } = await supabase
     .from("cart_items")
     .select("*")
     .eq("user_id", userId)
     .eq("product_id", productId)
     .single();
 
+  if (checkError && checkError.code !== "PGRST116") {
+    // PGRST116 is "not found" error, which is expected if item doesn't exist
+    console.error("Error checking existing cart item:", checkError);
+    throw checkError;
+  }
+
   if (existingItem) {
+    console.log("Updating existing cart item", existingItem);
     // Update quantity if item exists
     const { error } = await supabase
       .from("cart_items")
       .update({ quantity: existingItem.quantity + quantity })
       .eq("id", existingItem.id);
 
-    if (error) throw error;
+    if (error) {
+      console.error("Error updating cart item:", error);
+      throw error;
+    }
+    console.log("Cart item updated successfully");
   } else {
+    console.log("Inserting new cart item");
     // Insert new item if it doesn't exist
-    const { error } = await supabase.from("cart_items").insert([
+    const { data, error } = await supabase.from("cart_items").insert([
       {
         user_id: userId,
         product_id: productId,
         quantity,
       },
-    ]);
+    ])
+    .select();
 
-    if (error) throw error;
+    if (error) {
+      console.error("Error inserting cart item:", error);
+      throw error;
+    }
+    console.log("Cart item inserted successfully", data);
   }
 };
 

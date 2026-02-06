@@ -38,7 +38,7 @@ export default function ProductListing() {
   // Filter products based on search, category, and price
   const filteredProducts = useMemo(() => {
     if (!products) return [];
-
+    
     return products.filter((product: any) => {
       // Search filter
       const matchesSearch =
@@ -61,7 +61,7 @@ export default function ProductListing() {
 
   const handleAddToCart = (productId: string) => {
     // Prevent multiple clicks on the same product
-    if (addingProductId === productId || isAddingToCart) return;
+    if (addingProductId === productId) return;
     
     setAddingProductId(productId);
     addToCart(
@@ -245,11 +245,11 @@ export default function ProductListing() {
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      if (addingProductId !== product.id && !isAddingToCart && product.stock > 0) {
+                      if (addingProductId !== product.id && product.stock > 0) {
                         handleAddToCart(product.id);
                       }
                     }}
-                    disabled={addingProductId === product.id || isAddingToCart || product.stock === 0}
+                    disabled={addingProductId === product.id || product.stock === 0}
                     className="w-full"
                     variant={product.stock === 0 ? "outline" : "default"}
                   >
